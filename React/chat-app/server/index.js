@@ -77,27 +77,27 @@ io.on('connection', socket => {
       console.log(JSON.stringify(users))
     })
 
-    socket.on('user:leave', (username, peerId) => {
+    socket.on('user:leave', (username) => {
       users.map((user) => {
         if (user.un == username){
           user.rdy = false
-          user.peer = peerId
         }
       })
     })
 
     socket.on('user:online', (username, userId) => {
       let s = true
-      console.log('wtf')
+      console.log('username: ' + username + 'userId' + userId)
       users.map((user) => {
         if(user.rdy && s && (user.un != username)){
           s = false
           console.log('got')
+          user.peerId = userId
+          user.peerUn = username
           io.sockets.in(username).emit('getId', user.id, user.un)
+          //io.sockets.in(user.un).emit('getRemId', username, userId)
           // socket.emit('getId', user.id)  
         }
-        if(userId == user.peer)
-          io.sockets.in(username).emit('getUn', user.un)
         console.log('no got')
       })
       if(s){
@@ -105,6 +105,20 @@ io.on('connection', socket => {
         io.sockets.in(username).emit('getId', '', '')
         // socket.emit('getId', '')  
       }  
+    })
+
+    // socket.on('msg:remId', () => {
+    //   users.map((user) => {
+    //     user.peerId = 
+    //   })
+    // })
+
+    socket.on('msg:snd', (username) => {
+      users.map((user) => {
+        console.log('works')
+        if(user.un == username)
+          io.sockets.in(username).emit('getRemId', user.peerId, user.peerUn)
+      })
     })
 
     socket.on('disconnect', () => {

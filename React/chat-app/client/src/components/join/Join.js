@@ -1,27 +1,21 @@
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
+import React from 'react'
+import {Link } from 'react-router-dom'
 import { Form, Button } from 'react-bootstrap'
-import socket from "../../socket"
 import { useLocalStorage } from "../../hooks/useLocalStorage"
 
 
 
 export default function Join(){
-    // window.localStorage.clear()
-    const [isLogined] = useLocalStorage('isLogined')
-    console.log(isLogined)
-    console.log(JSON.parse('123'))
+    //window.localStorage.clear()
+    const [isLogined] = useLocalStorage('isLogined', false)
     return(
         <Form className=''>
-        <p>{typeof(isLogined)}</p>
-        <p>{window.localStorage.getItem('username')}</p>
+            <h1>Web-chat-roulette</h1>
+            <Button style={{marginBottom: '10px'}} className="mt-3" variant={"dark"} as={Link} to={'/reg/'}>Sign up</Button>
             {isLogined ? 
-            <Button variant={"success"} href={'/chat/'}>Вход</Button> :
-            <Button variant={"success"} href={'/auth/'}>Вход</Button>
-            }
-            <Button variant={"dark"} as={Link} to={'/reg/'}>Регистрация</Button>
+                <Button className="mt-3" style={{marginLeft: '5px', marginBottom: '10px'}} variant={"dark"} href={'/chat/'}>Sign in</Button> :
+                <Button className="mt-3" style={{marginLeft: '5px', marginBottom: '10px'}} variant={"dark"} href={'/auth/'}>Sign in</Button>
+            }     
         </Form>
-            
-            // {/* <Button as={Link} to={'/auth'} >Войти</Button>
-            // <Button as={Link} to={'/reg'}>Зарегистрироваться</Button> */}
     )
 }

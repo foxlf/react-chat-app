@@ -7,21 +7,17 @@ import socket from '../socket/index'
 export const useP2P = (curVideoRef, remVideoRef) => {
     const [username] = useLocalStorage('username')
     const [remUsername, setRemUsername] = useState('')
-    const [messages, setMessages] = useState([])
     const [userId] = useLocalStorage('id', uuid())
     const [variant, setVariant] = useState(0)
+    const [messages, setMessages] = useState([])
     const peerI = useRef(null)
-    const [ch, setCh] = useState('')
-    const [isOnline, setIsOnline] = useState(false)
     const [remPeerId, setRemPeerId] = useState('')
-    const [roomId] = useLocalStorage('roomId')
     const ms1 = useRef(null)
     const ms2 = useRef(null)
     
     useEffect(() => {
-        console.log('test')
         socket.emit('id:add', username, userId)
-        // socket.emit('user:online', username)
+        //! socket.emit('user:online', username)
         // socket.on('getId', peerId => {
         //     console.log('pp:' + peerId)
         //     setRemPeerId(peerId)
@@ -31,21 +27,22 @@ export const useP2P = (curVideoRef, remVideoRef) => {
                 console.log('id:' + id)
                 
             })
-            // if (!peerId){
-            //     peerI.current = peer
-            //     return {remPeerId}
-            // }
-            // else {
+
             
+
             peer.on('call', call => {
-                
                 console.log('variant1: ' + variant)
-                socket.emit('user:online', username, userId)
-                socket.on('getUn', (remUn) => {
-                    console.log('name' + remUn)
-                    setRemUsername(remUn)
+                //socket.emit('user:online', username, userId)
+                socket.emit('msg:snd', username)
+                socket.on('getRemId', (remId, remUn) => {
+                    console.log('remun: ' + remUn)
+                    console.log('remid: ' + remId)
+                    if(remId){
+                        setRemPeerId(remId)
+                        setRemUsername(remUn)
+                    }
                 })
-                socket.emit('user:leave', username, )
+                socket.emit('user:leave', username)
                 console.log('mne pozvonili')
                 const getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
                 getUserMedia({ video: true, audio: true}, mediaStream => {
@@ -57,17 +54,29 @@ export const useP2P = (curVideoRef, remVideoRef) => {
                         remVideoRef.current.srcObject = remoteStream
                         remVideoRef.current.play()
                     })
-                    call.on('close', () => {
-                        console.log('close3')
-                    })
                 })
             })
+
+            peer.on('connection', conn => {
+                conn.on('open', () => {
+                    console.log('gets')
+                    conn.on('data', data => {
+                        console.log('Incoming data' + data);
+                        console.log('json: ' + JSON.stringify(data))
+                        //setMessages([...messages, {username: remUsername, message: data}])
+                        setMessages(data)
+                        console.log('json: ' + JSON.stringify(messages))
+                    });
+                })
+            })
+
             peer.on('disconnected', () => {
+                socket.emit('user:leave', username)
                 console.log('discted')
                 //Ms.stop()
                 // remVideoRef.current.stop()
             })
-            console.log('success')
+            console.log('id2' + remPeerId)
             peerI.current = peer
     // })
         // setPeerInstance(peer)
@@ -76,7 +85,7 @@ export const useP2P = (curVideoRef, remVideoRef) => {
 
     const call = (curVideoRef, remVideoRef) => {
         socket.emit('id:add', username, userId)
-        socket.emit('user:online', username)
+        socket.emit('user:online', username, userId)
         socket.on('getId', (peerId, remUn) => {
             console.log('pp:' + peerId)
             setRemPeerId(peerId)
@@ -87,9 +96,7 @@ export const useP2P = (curVideoRef, remVideoRef) => {
             socket.emit('user:leave', username, peerId)
             setRemUsername(remUn)
             setVariant(0)
-            console.log('udacha')
             const getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-            console.log(getUserMedia)
             getUserMedia({ video: true, audio: true }, (mediaStream) => {
                 ms2.current = mediaStream
                 curVideoRef.current.srcObject = mediaStream;
@@ -122,6 +129,24 @@ export const useP2P = (curVideoRef, remVideoRef) => {
         
       }
 
+    const senMsg = (msg) => {
+        console.log('name: ' + remUsername)
+        console.log('peerId: ' + remPeerId)
+        const conn = peerI.current.connect(remPeerId)
+        conn.on('open', () => {
+            console.log('send')
+            // conn.on('data', data => {
+            //     //console.log('data: ' + data)
+                
+            //     //setMsg('hi')
+            // });
+            setMessages([...messages, {username: username, message: msg}])
+            conn.send([...messages, {username: username, message: msg}]);
+            console.log('json: ' + JSON.stringify(messages))
+            
+        })
+
+    }
     //   const rec = (curVideoRef, remVideoRef) => {
           
     //     setCh(uuid())
@@ -152,5 +177,5 @@ export const useP2P = (curVideoRef, remVideoRef) => {
     //       call(curVideoRef, remVideoRef)
     //   }
     
-    return {remPeerId, variant, remUsername, userId, call, disc}
+    return {messages, remPeerId, variant, remUsername, userId, call, disc, senMsg}
 }

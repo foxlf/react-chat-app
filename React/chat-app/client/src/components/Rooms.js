@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react"
 import Peer from 'peerjs'
-import { Link } from "react-router-dom"
-import { Button, Form, FormControl, FormLabel, InputGroup } from "react-bootstrap"
-import socket from "../socket"
+import {Text} from './chat/Text'
+import {MessageList} from './chat/MessageList'
+import { Button, Container, Form, FormControl, FormLabel, InputGroup } from "react-bootstrap"
 import { v1 as uuid } from "uuid";
 import {useLocalStorage} from "../hooks/useLocalStorage"
 import {useP2P} from '../hooks/useP2P'
@@ -11,8 +11,7 @@ import { Video } from './chat/Video'
 export default function Rooms(){
     const curVideoRef = useRef(null)
     const remVideoRef = useRef(null)
-    const {peerId, variant, remUsername, userId, call, disc} = useP2P(curVideoRef, remVideoRef)
-    const [remotePeerIdValue, setRemotePeerIdValue] = useState('')
+    const {messages, peerId, variant, remUsername, userId, call, disc, senMsg} = useP2P(curVideoRef, remVideoRef)
     const [username] = useLocalStorage('username')
 
     useEffect(() => {
@@ -120,16 +119,13 @@ export default function Rooms(){
 
     return(
         <Form>
-            <Button onClick={() => disc()} variant='danger' as={Link} to={'/chat'}>
-                Back to menu
-            </Button>
             <p>Your id: {userId}</p>
             {/* <p>His id: {remotePeerIdValue}</p> */}
             <Form.Group>
                 {/* <FormControl value={remotePeerIdValue} onChange={e => setRemotePeerIdValue(e.target.value)} /> */}
                 {/* <Button onClick={() => call(curVideoRef, remVideoRef)}>Call</Button> */}
-                <Button onClick={() => disc()}>Stop</Button>
-                <Button href={`/chat/${uuid()}`} onClick={() => {/*rec(curVideoRef, remVideoRef)*/}}>Next</Button>
+                <Button variant={'dark'} onClick={() => disc()}>Stop</Button>
+                <Button style={{marginLeft: '5px'}} variant={'dark'} href={`/chat/${uuid()}`} onClick={() => {/*rec(curVideoRef, remVideoRef)*/}}>Next</Button>
             </Form.Group>
             {/* {!peerId ? <p>no free users</p> : <p>pick rec</p>}
             {variant ? <p>stopped cal</p> : <p></p>} */}
@@ -143,9 +139,10 @@ export default function Rooms(){
                 <FormLabel>{username}</FormLabel>
                 <FormLabel style={{marginLeft: '70%'}}>{remUsername}</FormLabel>
             </Form.Group>
-            <Form.Group>
-
-            </Form.Group>
+            <Container>
+                <MessageList messages={messages}/>
+                <Text senMsg={senMsg} />
+            </Container>
         </Form>
     )
 }

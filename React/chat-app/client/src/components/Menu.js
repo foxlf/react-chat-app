@@ -17,27 +17,17 @@ export default function Menu(){
     return(
         
         <Form>
-            <Container style={{ maxWidth: '100%', height: '100%', backgroundColor: '#ff8800'}}>
-                <Form.Group >
-                {/* // className='mt-2' */}
-                {/* // style={{ maxWidth: '320px', margin: '0 auto' }} */}
-                    <Form.Group>
-                        <FormLabel>
-                            Menu
-                        </FormLabel>
-                        <FormLabel style={{paddingLeft: '90%'}}>
-                            {username}
-                        </FormLabel>
-                    </Form.Group>
-                    <FormLabel>
-                        {String(isLogined)}
+            <Container style={{}}>
+                <h1>Menu
+                    <FormLabel style={{marginLeft: '60%'}}>
+                        Login: {username}
                     </FormLabel>
-                </Form.Group>
-                <Button variant='success' href={`/chat/${id}`} >
-                    Найти
-                </Button>
-                <Button variant='danger' href={'/'} onClick={() => {window.localStorage.clear()}}>
+                </h1>
+                <Button style={{marginBottom: '10px'}} variant='dark' href={'/'} onClick={() => {window.localStorage.clear()}}>
                     Exit
+                </Button>
+                <Button style={{marginLeft: '5px', marginBottom: '10px'}} variant='dark' href={`/chat/${id}`} >
+                    Start
                 </Button>
             </Container>
         </Form>
